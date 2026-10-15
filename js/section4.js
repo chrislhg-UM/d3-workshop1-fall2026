@@ -107,18 +107,60 @@ const hBarWidth = 400 - hBarMargin.left - hBarMargin.right;
 const hBarHeight = 500 - hBarMargin.top - hBarMargin.bottom;
 
 // Create SVG for horizontal bar chart
+const horizontalBarSvg = d3.select('#demo-4')
+    .append('svg')
+    .attr('viewBox', `0 0 ${hBarWidth + hBarMargin.left + hBarMargin.right} ${hBarHeight + hBarMargin.top + hBarMargin.bottom}`)
+    .attr('preserveAspectRatio', 'xMidYMid meet')
+    .append('g')
+    .attr('transform', `translate(${hBarMargin.left},${hBarMargin.top})`);
 
 
 // Create scales for the horizontal bar chart
+const xHBarScale = d3.scaleLinear()
+    .domain([0, d3.max(top15Gas, d => d.gas)])
+    .range([0, hBarWidth]);
 
+
+const yHBarScale = d3.scaleBand()
+    .domain(top15Gas.map(d => d.state))
+    .range([0, hBarHeight])
+    .padding(0.25);
 
 // Create axes and append them to the svg
+const xHBarAxis = d3.axisBottom(xHBarScale);
 
+horizontalBarSvg.append('g')
+    .attr('transform', `translate(0, ${hBarHeight})`)
+    .call(xHBarAxis)
+
+const yHBarAxis = d3.axisLeft(yHBarScale);
+
+horizontalBarSvg.append('g')
+    .call(yHBarAxis);
 
 // Create and append bars to the chart
-
+horizontalBarSvg.selectAll('rect')
+    .data(top15Gas)
+    .join('rect')
+    .attr('x', 0)
+    .attr('y', d => yHBarScale(d.state))
+    .attr('width', d => xHBarScale(d.gas))
+    .attr('height', yHBarScale.bandwidth())
+    .attr('fill', 'orange')
 
 // Chart title
-
+horizontalBarSvg.append('text')
+    .attr('x', hBarWidth / 2)
+    .attr('y', -10)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '16px') 
+    .style('font-weight', 'bold')
+    .text('Top 15 States by Gas Price');
 
 // X axis label
+horizontalBarSvg.append('text')
+    .attr('x', hBarWidth / 2)
+    .attr('y', hBarHeight + 45)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .text('Gas Price (USD per gallon)');
